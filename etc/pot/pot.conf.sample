@@ -10,6 +10,9 @@
 # This is the cache used to import/export pots
 # POT_CACHE=/var/cache/pot
 
+# This is where pot is going to store temporary files
+# POT_TMP=/tmp
+
 # This is the suffix added to temporary files created using mktemp,
 # X is a placeholder for a random character, see mktemp(1)
 # POT_MKTEMP_SUFFIX=.XXXXXXXX

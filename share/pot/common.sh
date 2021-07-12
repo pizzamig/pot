@@ -189,6 +189,21 @@ _is_flavourdir()
 	return 0 # true
 }
 
+# check the POT_TMP directory
+# if missing, it will initialize it
+_is_pot_tmp_dir()
+{
+	# shellcheck disable=SC3043
+	local _pot_tmp
+	_pot_tmp="${POT_TMP:-/tmp}"
+	if [ ! -d "$_pot_tmp" ]; then
+		mkdir -p "$_pot_tmp"
+	fi
+	if [ ! -d "$_pot_tmp" ]; then
+		return 1 # false
+	fi
+}
+
 # check if the dataset is a dataset name
 # $1 the dataset NAME
 # tested

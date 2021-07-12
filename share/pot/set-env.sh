@@ -31,7 +31,11 @@ pot-set-env()
 	local _pname _env _tmpfile
 	_env=
 	_pname=
-	_tmpfile="/tmp/pot-set-env"
+	if ! _is_pot_tmp_dir ; then
+		_error "Failed to create the POT_TMP directory"
+		return 1
+	fi
+	_tmpfile="$(mktemp "${POT_TMP:-/tmp}/pot-set-env${POT_MKTEMP_SUFFIX}")" || exit 1
 	OPTIND=1
 	while getopts "hvp:E:" _o ; do
 		case "$_o" in
@@ -51,7 +55,7 @@ pot-set-env()
 				return 1
 			fi
 			_tmp="$( echo "$OPTARG" | sed 's%"%\\"%g' )"
-			echo "\"$_tmp\"" >> $_tmpfile
+			echo "\"$_tmp\"" >> "$_tmpfile"
 			_env=1
 			;;
 		p)
@@ -82,5 +86,5 @@ pot-set-env()
 		return 1
 	fi
 	_set_environment "$_pname" "$_tmpfile"
-	rm "$_tmpfile"
+	rm -f "$_tmpfile"
 }

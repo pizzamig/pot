@@ -11,7 +11,7 @@ stop-help()
 
 _js_cpu_rebalance()
 {
-	if ! _tmpfile=$(mktemp -t "potcpu.XXXXXX") ; then
+	if ! _tmpfile=$(mktemp -t "${POT_TMP:-/tmp}/potcpu.XXXXXX") ; then
 		_error "not able to create temporary file - umount failed"
 		return
 	fi
@@ -44,7 +44,7 @@ _js_stop()
 			)
 		fi
 		_debug "Stop the pot $_pname"
-		touch "/tmp/pot_stopped_${_pname}"
+		touch "${POT_TMP:-/tmp}/pot_stopped_${_pname}"
 		jail -q -r "$_pname"
 		if [ -n "$_epair" ]; then
 			_debug "Remove ${_epair%b}[a|b] network interfaces"
@@ -117,8 +117,8 @@ _js_stop()
 			"${_pdir}"/conf/poststop.sh
 		)
 	fi
-	rm -f "/tmp/pot_${_pname}_pfrules"
-	rm -f "/tmp/pot_environment_${_pname}.sh"
+	rm -f "${POT_TMP:-/tmp}/pot_pfrules_${_pname}*"
+	rm -f "${POT_TMP:-/tmp}/pot_environment_${_pname}*.sh"
 	return 0 # true
 }
 

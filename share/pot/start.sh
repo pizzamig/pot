@@ -272,7 +272,7 @@ _js_export_ports()
 	if [ -z "$_ports" ]; then
 		return
 	fi
-	_pfrules=$(mktemp "/tmp/pot_pfrules_${_pname}${POT_MKTEMP_SUFFIX}") || exit 1
+	_pfrules=$(mktemp "${POT_TMP:-/tmp}/pot_pfrules_${_pname}${POT_MKTEMP_SUFFIX}") || exit 1
 	_lo_tunnel="$(_get_conf_var "$_pname" "pot.attr.localhost-tunnel")"
 	for _port in $_ports ; do
 		_proto_port="tcp"
@@ -379,7 +379,7 @@ _js_env()
 	local _pname _shfile _cfile
 	_pname="$1"
 	_cfile="${POT_FS_ROOT}/jails/$_pname/conf/pot.conf"
-	_shfile=$(mktemp "/tmp/pot_environment_${_pname}${POT_MKTEMP_SUFFIX}") || exit 1
+	_shfile=$(mktemp "${POT_TMP:-/tmp}/pot_environment_${_pname}${POT_MKTEMP_SUFFIX}") || exit 1
 	grep '^pot.env=' "$_cfile" | sed 's/^pot.env=/export /g' > "$_shfile"
 	pot-cmd info -E -p "$_pname" >> "$_shfile"
 	if [ "$(_get_conf_var "$_pname" "pot.attr.no-rc-script")" = "YES" ]; then
@@ -516,11 +516,11 @@ _js_start()
 		)
 	fi
 
-	rm -f "/tmp/pot_stopped_${_pname}"
+	rm -f "${POT_TMP:-/tmp}/pot_stopped_${_pname}"
 
 	_info "Starting the pot $_pname"
 	# shellcheck disable=SC2086
-	jail -c -J "/tmp/${_pname}.jail.conf" $_param exec.start="sh -c 'sleep 5&'"
+	jail -c -J "${POT_TMP:-/tmp}/${_pname}.jail.conf" $_param exec.start="sh -c 'sleep 5&'"
 
 	if [ -e "$_confdir/pot.conf" ] && _is_pot_prunable "$_pname" ; then
 		# set-attr cannot be used for read-only attributes
@@ -549,7 +549,7 @@ _js_start()
 	wait "$_wait_pid"
 
 	if ! _is_pot_running "$_pname" ; then
-		if [ ! -e "/tmp/pot_stopped_${_pname}" ]; then
+		if [ ! -e "${POT_TMP:-/tmp}/pot_stopped_${_pname}" ]; then
 			start-cleanup "$_pname" "${_iface}"
 		fi
 		if [ "$_persist" = "NO" ]; then
@@ -636,6 +636,10 @@ pot-start()
 		return 1
 	fi
 
+	if ! _is_pot_tmp_dir ; then
+		_error "failed to create the POT_TMP directory"
+		return 1
+	fi
 	if ! _js_dep "$_pname" ; then
 		_error "dependecy failed to start"
 	fi

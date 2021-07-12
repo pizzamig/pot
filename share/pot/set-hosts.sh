@@ -30,7 +30,11 @@ pot-set-hosts()
 	# shellcheck disable=SC3043
 	local _pname _tmpfile _ip _hostname
 	_pname=
-	_tmpfile="/tmp/pot-set-hosts"
+	if ! _is_pot_tmp_dir ; then
+		_error "Failed to create the POT_TMP directory"
+		return 1
+	fi
+	_tmpfile="$(mktemp "${POT_TMP:-/tmp}/pot-set-hosts${POT_MKTMP_SUFFIX}")" || exit 1
 	OPTIND=1
 	while getopts "hvp:H:" _o ; do
 		case "$_o" in
@@ -62,7 +66,7 @@ pot-set-hosts()
 				set-hosts-help
 				return 1
 			fi
-			echo "$_ip $_hostname" >> $_tmpfile
+			echo "$_ip $_hostname" >> "$_tmpfile"
 			;;
 		p)
 			_pname="$OPTARG"
@@ -87,5 +91,5 @@ pot-set-hosts()
 		return 1
 	fi
 	_set_hosts "$_pname" "$_tmpfile"
-	rm "$_tmpfile"
+	rm -f "$_tmpfile"
 }

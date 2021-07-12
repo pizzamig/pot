@@ -84,6 +84,11 @@ pot-init()
 	mkdir -p /usr/local/etc/newsyslog.conf.d
 	mkdir -p /var/log/pot
 
+	if ! _is_pot_tmp_dir ; then
+		_error "The POT_TMP directory has not been created - aborting"
+		${EXIT} 1
+	fi
+
 	if ! potnet config-check ; then
 		_error "The network configuration in the pot configuration file is not valid"
 		${EXIT} 1
